@@ -96,9 +96,10 @@ function link_files {
 }
 
 function install {
-  git clone git@github.com:jcinnamond/dotup.git $HOME/.dotup
+  git clone git@github.com:jcinnamond/dotup.git $HOME/.dotup > /dev/null
   mkdir $HOME/bin
   ln -sf $DOTUP_HOME/bin/dotup $HOME/bin/dotup
+  link_files
 }
 
 function update {
@@ -191,22 +192,24 @@ function remove {
   cleanup force
 
   # Move restore files back into place
-  files=`find $RESTORE_DIR -type f`
-  for path in $files; do
-    dir=`dirname $path | sed -e "s|$RESTORE_DIR||"`
-    file=`basename $path`
-    dest=$HOME$dir/$file
+  if [ -d $RESTORE_DIR ]; then
+    files=`find $RESTORE_DIR -type f`
+    for path in $files; do
+      dir=`dirname $path | sed -e "s|$RESTORE_DIR||"`
+      file=`basename $path`
+      dest=$HOME$dir/$file
 
-    mkdir -p $HOME$dir
+      mkdir -p $HOME$dir
 
-    if [ -f dest ]; then
-      printf "Can't restore $src: it already exists\n"
-      continue
-    else
-      debug "& restoring $dest\n"
-      mv $path $dest
-    fi
-  done
+      if [ -f dest ]; then
+        printf "Can't restore $src: it already exists\n"
+        continue
+      else
+        debug "& restoring $dest\n"
+        mv $path $dest
+      fi
+    done
+  fi
 
   # Delete if no changes
   pushd $DOTUP_HOME > /dev/null
