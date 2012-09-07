@@ -6,7 +6,13 @@ DOTFILE_DIR=$DOTUP_HOME/dotfiles
 command=$1
 command_arg=$2
 
-DEBUGGING=$DEBUG || 0
+last_arg=${@: -1}
+
+if [ X$last_arg == Xdebug ]; then
+  DEBUGGING=1
+else
+  DEBUGGING=$DEBUG
+fi
 
 function debug {
   if [ $DEBUGGING ]; then
@@ -157,18 +163,35 @@ function status {
   fi
 }
 
+function cleanup {
+  symlinks=`find $HOME -type l 2> /dev/null`
+  for link in $symlinks; do
+    src=`stat --format=%N $link | sed -e "s/^\\\`\([^']*\)'.*/\1/"`
+    dest=`stat --format=%N $link | sed -e "s/.*\\\`\(.*\)'$/\1/"`
+    echo $dest | grep $DOTUP_HOME > /dev/null 2>&1
+    if [ $? -eq 0 ]; then
+      if [ ! -r $dest ]; then
+        debug "* Removing dangling link $src\n"
+        rm $src
+      else
+      debug "| Leaving $src\n"
+      fi
+    fi
+  done
+}
+
 #------------------------------------------------------------------------------
 # Argument processing
 #------------------------------------------------------------------------------
 
 if [ -z $command ]; then
   up
-elif [ $command == "up" ]; then
+elif [ $command == "up" -o $command == "debug" ]; then
   up
 elif [ $command == "status" ]; then
   status
 elif [ $command == "cleanup" ]; then
-  printf "cleanup\n"
+  cleanup
 elif [ $command == "remove" ]; then
   printf "remove\n"
 elif [ $command == "-h" -o $command == "help" ]; then
