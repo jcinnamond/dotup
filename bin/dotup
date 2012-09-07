@@ -17,13 +17,21 @@ function debug {
 function usage {
   progname=`basename $0`
   cat <<EOF
-usage: $progname <command>
+usage: $progname [command [options]]
+
 
 COMMANDS:
   up       - setup or update the profile 
              (default if no command given)
+             Add 'remote' to run git pull when updating
+
   status   - warn about any updates or local modifications
+             Add 'local' to only show modified files
+             Add 'remote' to only show changes with origin
+             (default is to show both)
+
   cleanup  - removes dangling symlinks to .dotup
+
   remove   - removes all symlinks to .dotup, restoring any original files
 EOF
 }
@@ -111,12 +119,27 @@ function up {
 
 function local_status {
   pushd $DOTUP_HOME > /dev/null
-  git status
+  git status -s
   popd > /dev/null
 }
 
 function remote_status {
-  printf "Remote status\n"
+  pushd $DOTUP_HOME > /dev/null
+  git fetch > /dev/null 2>&1
+  to_apply=`git log --oneline ..origin/master`
+  if [ -n "$to_apply" ]; then
+    printf "** Remote updates to apply\n"
+    git log --oneline ..origin/master
+    printf "\n"
+  fi
+
+  to_push=( `git log --oneline origin/master..` )
+  if [ -n "$to_push" ]; then
+    printf "** Changes not pushed to remote\n"
+    git log --oneline origin/master..
+    printf "\n"
+  fi
+  popd > /dev/null
 }
 
 function status {
@@ -127,6 +150,7 @@ function status {
   else
     printf "Local changes\n\n"
     local_status
+    printf "\n------------------------------------------------------------------------------\n"
     printf "\nRemote changes\n\n"
     remote_status
   fi
