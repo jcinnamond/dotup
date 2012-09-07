@@ -1,6 +1,18 @@
 #!/bin/bash
 
+DOTUP_HOME=$HOME/.dotup
+DOTFILE_DIR=$DOTUP_HOME/dotfiles
+
 command=$1
+command_arg=$2
+
+DEBUGGING=$DEBUG || 0
+
+function debug {
+  if [ $DEBUGGING ]; then
+    printf "DEBUG: $1"
+  fi
+}
 
 function usage {
   progname=`basename $0`
@@ -11,6 +23,8 @@ COMMANDS:
   up       - setup or update the profile 
              (default if no command given)
   status   - warn about any updates or local modifications
+  cleanup  - removes dangling symlinks to .dotup
+  remove   - removes all symlinks to .dotup, restoring any original files
 EOF
 }
 
@@ -29,24 +43,92 @@ function check_dependencies {
 }
 
 function is_setup {
-  test -d $HOME/.dotup
+  test -d $DOTUP_HOME
+}
+
+function link_files {
+  files=`find $DOTFILE_DIR -type f`
+  for path in $files; do
+    dir=`dirname $path | sed -e "s|$DOTFILE_DIR||"`
+    file=`basename $path`
+    symlink_dest=$HOME$dir/$file
+
+    # Backup existing files
+    if [ -h $symlink_dest ]; then
+      dest=`stat --format=%N $symlink_dest | sed -e "s/.*\\\`\(.*\)'$/\1/"`
+      if [ $dest == $path ]; then
+        debug "| $symlink_dest is already linked\n"
+      else
+        printf "$symlink_dest points somewhere else: skipping\n"
+      fi
+      continue
+    elif [ -d $symlink_dest ]; then
+      printf "can't install $symlink_dest: target already exists as a directory\n"
+      continue
+    elif [ -f $symlink_dest ]; then
+      debug "& copying $symlink_dest to the restore directory\n"
+      mkdir -p $DOTUP_HOME/restore/$dir
+      cp $symlink_dest $DOTUP_HOME/restore/$dir
+    fi
+
+    debug "-> linking $path to $symlink_dest\n"
+
+    if [ X$dir != X  -a ! -d $HOME/$dir ]; then
+      mkdir -p $HOME/$dir
+    fi
+
+    ln -sf $path $symlink_dest
+  done
 }
 
 function install {
-  pushd $HOME
   git clone git@github.com:jcinnamond/dotup.git $HOME/.dotup
-  popd
+  mkdir $HOME/bin
+  ln -sf $DOTUP_HOME/bin/dotup $HOME/bin/dotup
+}
+
+function update {
+  pushd $DOTUP_HOME > /dev/null
+  #git pull
+  popd > /dev/null
+  link_files
 }
 
 function up {
   check_dependencies
+  pushd $HOME > /dev/null
   if is_setup; then
-    printf "Updating..."
-    printf "done\n"
+    printf "dotup updating\n"
+    update
+    printf "dotup finished\n"
   else
-    printf "Installing..."
-    sleep 3
-    printf "done\n"
+    printf "dotup installing"
+    install
+    printf "dotup finished\n"
+  fi
+  popd > /dev/null
+}
+
+function local_status {
+  pushd $DOTUP_HOME > /dev/null
+  git status
+  popd > /dev/null
+}
+
+function remote_status {
+  printf "Remote status\n"
+}
+
+function status {
+  if [ X$command_arg == Xlocal ]; then
+    local_status
+  elif [ X$command_arg == Xremote ]; then
+    remote_status
+  else
+    printf "Local changes\n\n"
+    local_status
+    printf "\nRemote changes\n\n"
+    remote_status
   fi
 }
 
@@ -59,7 +141,13 @@ if [ -z $command ]; then
 elif [ $command == "up" ]; then
   up
 elif [ $command == "status" ]; then
-  printf "status\n"
+  status
+elif [ $command == "cleanup" ]; then
+  printf "cleanup\n"
+elif [ $command == "remove" ]; then
+  printf "remove\n"
+elif [ $command == "-h" -o $command == "help" ]; then
+  usage
 else
   printf "Unrecognised command: $command\n\n"
   usage
