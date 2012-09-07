@@ -1,0 +1,67 @@
+#!/bin/bash
+
+command=$1
+
+function usage {
+  progname=`basename $0`
+  cat <<EOF
+usage: $progname <command>
+
+COMMANDS:
+  up       - setup or update the profile 
+             (default if no command given)
+  status   - warn about any updates or local modifications
+EOF
+}
+
+function check_command {
+  command=$1
+  which $command > /dev/null 2>&1
+  status=$?
+  if [ $status -ne 0 ]; then
+    printf "Unmet dependency: you need to install $command\n"
+    exit 1
+  fi
+}
+
+function check_dependencies {
+  check_command git
+}
+
+function is_setup {
+  test -d $HOME/.dotup
+}
+
+function install {
+  pushd $HOME
+  git clone git@github.com:jcinnamond/dotup.git $HOME/.dotup
+  popd
+}
+
+function up {
+  check_dependencies
+  if is_setup; then
+    printf "Updating..."
+    printf "done\n"
+  else
+    printf "Installing..."
+    sleep 3
+    printf "done\n"
+  fi
+}
+
+#------------------------------------------------------------------------------
+# Argument processing
+#------------------------------------------------------------------------------
+
+if [ -z $command ]; then
+  up
+elif [ $command == "up" ]; then
+  up
+elif [ $command == "status" ]; then
+  printf "status\n"
+else
+  printf "Unrecognised command: $command\n\n"
+  usage
+fi
+
