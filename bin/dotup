@@ -23,7 +23,6 @@ usage: $progname [command [options]]
 COMMANDS:
   up       - setup or update the profile 
              (default if no command given)
-             Add 'remote' to run git pull when updating
 
   status   - warn about any updates or local modifications
              Add 'local' to only show modified files
@@ -97,7 +96,7 @@ function install {
 
 function update {
   pushd $DOTUP_HOME > /dev/null
-  #git pull
+  git pull --quiet
   popd > /dev/null
   link_files
 }
@@ -126,17 +125,19 @@ function local_status {
 function remote_status {
   pushd $DOTUP_HOME > /dev/null
   git fetch > /dev/null 2>&1
-  to_apply=`git log --oneline ..origin/master`
+  git_remote_changes='git log --no-merges --oneline ..origin/master'
+  to_apply=`$git_remote_changes`
   if [ -n "$to_apply" ]; then
     printf "** Remote updates to apply\n"
-    git log --oneline ..origin/master
+    $git_remote_changes
     printf "\n"
   fi
 
-  to_push=( `git log --oneline origin/master..` )
+  git_local_changes='git log --no-merges --oneline origin/master..'
+  to_push=`$git_local_changes`
   if [ -n "$to_push" ]; then
     printf "** Changes not pushed to remote\n"
-    git log --oneline origin/master..
+    $git_local_changes
     printf "\n"
   fi
   popd > /dev/null
