@@ -2,7 +2,9 @@
 
 DOTUP_HOME=$HOME/.dotup
 DOTFILE_DIR=$DOTUP_HOME/dotfiles
+RESTORE_DIR=$DOTUP_HOME/restore
 
+progname=`basename $0`
 command=$1
 command_arg=$2
 
@@ -21,7 +23,6 @@ function debug {
 }
 
 function usage {
-  progname=`basename $0`
   cat <<EOF
 usage: $progname [command [options]]
 
@@ -80,8 +81,8 @@ function link_files {
       continue
     elif [ -f $symlink_dest ]; then
       debug "& copying $symlink_dest to the restore directory\n"
-      mkdir -p $DOTUP_HOME/restore/$dir
-      cp $symlink_dest $DOTUP_HOME/restore/$dir
+      mkdir -p $RESTORE_DIR/$dir
+      cp $symlink_dest $RESTORE_DIR/$dir
     fi
 
     debug "-> linking $path to $symlink_dest\n"
@@ -164,20 +165,65 @@ function status {
 }
 
 function cleanup {
+  force=$1
   symlinks=`find $HOME -type l 2> /dev/null`
   for link in $symlinks; do
     src=`stat --format=%N $link | sed -e "s/^\\\`\([^']*\)'.*/\1/"`
     dest=`stat --format=%N $link | sed -e "s/.*\\\`\(.*\)'$/\1/"`
     echo $dest | grep $DOTUP_HOME > /dev/null 2>&1
     if [ $? -eq 0 ]; then
-      if [ ! -r $dest ]; then
-        debug "* Removing dangling link $src\n"
+      if [ X$force == Xforce -o ! -r $dest ]; then
+        if [ X$force == Xforce ]; then
+          debug "* Removing link $src\n"
+        else
+          debug "* Removing dangling link $src\n"
+        fi
         rm $src
       else
       debug "| Leaving $src\n"
       fi
     fi
   done
+}
+
+function remove {
+  # Remove all symlinks
+  cleanup force
+
+  # Move restore files back into place
+  files=`find $RESTORE_DIR -type f`
+  for path in $files; do
+    dir=`dirname $path | sed -e "s|$RESTORE_DIR||"`
+    file=`basename $path`
+    dest=$HOME$dir/$file
+
+    mkdir -p $HOME$dir
+
+    if [ -f dest ]; then
+      printf "Can't restore $src: it already exists\n"
+      continue
+    else
+      debug "& restoring $dest\n"
+      mv $path $dest
+    fi
+  done
+
+  # Delete if no changes
+  pushd $DOTUP_HOME > /dev/null
+  local_changes=`git status -s`
+  git_local_changes='git log --no-merges --oneline origin/master..'
+  to_push=`$git_local_changes`
+  popd > /dev/null
+
+  if [ -z "$to_push" -a -z "$local_changes" ]; then
+    rm -rf $DOTUP_HOME
+    printf "\n$DOTUP_HOME removed\n"
+    printf "bye bye\n"
+  else
+    printf "\n"
+    printf "Can't remove $DOTUP_HOME: you have changes there\n"
+    printf "(to see the changes run: $progname status)\n"
+  fi
 }
 
 #------------------------------------------------------------------------------
@@ -193,7 +239,7 @@ elif [ $command == "status" ]; then
 elif [ $command == "cleanup" ]; then
   cleanup
 elif [ $command == "remove" ]; then
-  printf "remove\n"
+  remove
 elif [ $command == "-h" -o $command == "help" ]; then
   usage
 else
