@@ -173,16 +173,16 @@ function add {
       continue
     fi
 
-    echo $path | grep '^./' > /dev/null 2>&1
+    echo $path | grep '^\./' > /dev/null 2>&1
     starts_with_dot_slash=$?
 
     echo $path | grep '^/' > /dev/null 2>&1
     starts_with_slash=$?
 
     if [ $starts_with_dot_slash -eq 0 ]; then
-      path=$CWD/`echo $path | sed -e "s|./||"`
+      path=$PWD/`echo $path | sed -e "s|^\./||"`
     elif [ $starts_with_slash -ne 0 ]; then
-      path=$CWD/$path
+      path=$PWD/$path
     fi
 
     debug "adding $path\n"
