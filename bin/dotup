@@ -146,6 +146,7 @@ function update {
   git pull --quiet
   popd > /dev/null
   link_files
+  cleanup
 }
 
 function up {
