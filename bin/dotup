@@ -102,7 +102,6 @@ function run_scripts {
   dir=$1
 
   scripts=`find $dir -type f -executable`
-  scripts=`ls $dir`
   for script in $scripts; do
     debug "running script: $script"
     source $script
