@@ -18,7 +18,7 @@ top of `bin/dotup`, replace the contents of `dotfiles` with your own
 setup and then run the dotup file. The project is designed to be self-
 installing, so you can do something like this:
 
-  curl -Ls 'https://raw.github.com/jcinnamond/dotup/master/bin/dotup' | bash 
+    curl -Ls 'https://raw.github.com/jcinnamond/dotup/master/bin/dotup' | bash 
 
 but obviously replace the url with your cloned repo.
 
@@ -56,7 +56,7 @@ the symlinks.
 
 You can see if there are any pending changes by running:
 
-  dotup status
+    dotup status
 
 This will show you 2 things. First, it shows you any files that you
 have modified or added to your dotfiles directory but haven't committed
@@ -95,7 +95,7 @@ Uninstalling
 
 The uninstall should be as simple as running
 
-  dotup remove
+    dotup remove
 
 If all goes well, this will put your home directory back to the way it
 was before dotup was installed, including restoring any files that were
