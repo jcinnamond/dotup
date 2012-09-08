@@ -118,6 +118,14 @@ If all goes well, this will put your home directory back to the way it
 was before dotup was installed, including restoring any files that were
 in the way when dotup first ran.
 
+Debugging
+=========
+
+To see more information about what dotup is doing you can turn on debug
+mode. There are 2 ways to enable this: either pass 'debug' as the final
+argument to dotup (e.g., `dotup debug`) or set the DEBUG environment
+variable to 1 (e.g., `DEBUG=1 dotup`).
+
 Licence
 =======
 
