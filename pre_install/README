@@ -1,0 +1,4 @@
+This directory contains scripts which are run BEFORE the dotfiles are
+symlinked in place. Use it to set up any extra dependencies. For example,
+I use this to install oh-my-zsh.
+

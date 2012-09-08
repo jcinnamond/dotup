@@ -1,0 +1,5 @@
+This directory contains scripts which are run AFTER the dotfiles are
+symlinked in place. Use it for any scripts which require your dotfiles
+to be in place before running. Note that none of your dotfiles will have
+been sourced when the script runs.
+

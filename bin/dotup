@@ -95,11 +95,24 @@ function link_files {
   done
 }
 
+function run_scripts {
+  dir=$1
+
+  scripts=`ls $dir`
+  for script in $scripts; do
+    path=$dir/$script
+    debug "running script: $path"
+    source $path
+  done
+}
+
 function install {
   git clone git@github.com:jcinnamond/dotup.git $HOME/.dotup > /dev/null 2>&1
   mkdir -p $HOME/bin
   ln -sf $DOTUP_HOME/bin/dotup $HOME/bin/dotup
+  run_scripts "$DOTUP_HOME/pre_install"
   link_files
+  run_scripts "$DOTUP_HOME/post_install"
 }
 
 function update {
