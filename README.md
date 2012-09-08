@@ -1,9 +1,10 @@
-Dotup is a tool for managing the various dotfiles under my home directory,
-along with the dotfiles themselves. It was designed with 3 main aims:
+Dotup is a tool for managing the various dotfiles under your home
+directory. It was designed with 4 main aims:
 
 1. It has to be easy to install (especially from chef recipes)
 2. It needs to be easy to change files on any machine and share those changes everywhere
 3. There needs to be a way to override some files on some machines
+4. It should minimise the dependencies to get it running
 
 Quickstart
 ==========
@@ -29,24 +30,40 @@ How it works
 The project works in a pretty standard way. All the dotfiles are
 stored in a git repo and are then symlinked into place under your home
 directory. The `dotup` bash script is designed to make it easy to set
-this up.
+this up and manage it.
 
-When run for the first time it will check out the repo to $HOME/.dotup
-and them symlink all of the files under `dotfiles` to the corresponding
-place under your home directory. For example, placing a file under
-`dotfiles/.ssh/rc` will result in it being symlinked to $HOME/.ssh/rc. If
-a file already exists at the symlink destination then it is copied to
-$HOME/.dotup/restore before being replaced by a symlink.
+When run for the first time it will check out the repo to `$HOME/.dotup`
+and them symlink all of the files under `.dotup/dotfiles` to the
+corresponding place under your home directory. For example, placing
+a file under `dotfiles/.ssh/rc` will result in it being symlinked to
+`$HOME/.ssh/rc`. If a file already exists at the symlink destination then
+it is copied to `$HOME/.dotup/restore` before being replaced by a symlink.
 
-I've tried to follow a principle of being non-destructive so as well
-as copying existing files to the `restore` directory the script will
-occasionally refuse to do things. If this happens it will try to tell
+Dotup tries to be non-destructive when it runs. In addition to copying
+existing files to the `restore` directory, the script also
+occasionally refuses to do things. If this happens it will try to tell
 you what happened and why. In spite of this approach, there is still a
 risk that things will go wrong, so make sure you know what you're doing
 and be careful to back files up before using this tool.
 
 Updating dotfiles
 =================
+
+You can see if there are any pending changes by running:
+
+    dotup status
+
+This will show you two things. First, it shows you any files that you
+have modified or added to your dotfiles directory but haven't committed
+yet. Second, it shows any new commits that have been pushed to github
+that you haven't applied yet, or any commits that you have made locally
+that haven't been pushed to github yet.
+
+If you make any local modifications you need to add them to the repo,
+push it to github and then run `dotup` on other machines to pull in the
+changes. There are two ways to manage the repo: using the dotup helpers
+or running cp/ln/git manually. These approaches are not exclusive,
+so you can mix and match them as you desire.
 
 Using dotup helpers
 -------------------
@@ -55,11 +72,11 @@ Add a file to `$HOME/.dotup/dotfiles` by running:
 
     dotup add <path to file>
 
-This will add it to the dotfile directory, copy the file to
-.dotfile/restore and then create a symlink for the file.
+This will copy the file to the dotfile directory and to
+`.dotfile/restore` and then create a symlink for the file.
 
-There are also two helpers to speed up commiting and pushing
-changes. These are (somewhat unimaginatively) `dotup commit` and
+There are also two helpers to speed up commiting and pushing changes
+to github. These are (somewhat unimaginatively) `dotup commit` and
 `dotup push`.
 
 Manually
@@ -67,24 +84,13 @@ Manually
 
 On any machine with dotup installed you should be able to modify, add
 or remove files under `$HOME/.dotup/dotfiles` and then use git add/rm
-and commit as normal. Once you have pushed those changes you simply
-need to run `dotup` on other machines to pull in the changes and create
-the symlinks.
-
-You can see if there are any pending changes by running:
-
-    dotup status
-
-This will show you 2 things. First, it shows you any files that you
-have modified or added to your dotfiles directory but haven't committed
-yet. Second, it shows any new commits that have been pushed to github
-that you haven't applied yet, or any commits that you have made locally
-that haven't been pushed to github yet.
+and commit as normal. Don't forget to create symlinks for any files you
+move to `.dotup/dotfiles` (or run `dotup` to create them for you).
 
 Machine specific overrides
 ==========================
 
-There are 2 approaches to overriding the behaviour of config files on a
+There are two approaches to overriding the behaviour of config files on a
 per-machine basis. The first (and best way) is to use conditional logic
 in the config file where this is available. For example, in my .zshrc
 I can add:
@@ -97,9 +103,9 @@ I can add:
 However, if the config file doesn't support conditional includes or if
 you simply don't want a file to be installed at all then you can tell
 dotup to ignore that file. To this this, create a file in your home
-directory called `.suppress-dotup`. In there, put the path to the each
+directory called `.suppress-dotup`. In there, put the path to each
 file you want suppressed on a line on its own. For example, if I want
-to suppress .ssh/rc and .zshrc then I would create `.suppress-dotup`
+to suppress `.ssh/rc` and `.zshrc` then I would create `.suppress-dotup`
 with the following content:
 
     .ssh/rc
