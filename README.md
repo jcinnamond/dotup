@@ -126,6 +126,20 @@ mode. There are 2 ways to enable this: either pass 'debug' as the final
 argument to dotup (e.g., `dotup debug`) or set the DEBUG environment
 variable to 1 (e.g., `DEBUG=1 dotup`).
 
+Credits
+=======
+
+Adding dotfiles to github and then symlinking them into place is a pretty
+common technique and I have no idea where I stole it from first. It
+certainly isn't an original idea.
+
+The dotfiles for various programs were copied from or heavily inspired
+by many lovely people sharing their dotfiles on the internets. Where I
+have remembered, I have added an attribution to the CREDITS file. There
+are inevitably occasions where I have forgotten where I copied the config
+from. If you see any attributions that I have missed then please let me
+know and I will update the CREDITS file accordingly.
+
 Licence
 =======
 

@@ -1,0 +1,30 @@
+.zshrc
+
+Robby Russel's wonderful oh-my-zsh
+(https://github.com/robbyrussell/oh-my-zsh).
+
+I also got some ideas for my cutom zsh prompt from Steve Losh
+(http://stevelosh.com/blog/2010/02/my-extravagant-zsh-prompt/).
+
+
+.vimrc
+
+My vimrc file started life as a direct copy of Amir
+Salihefendic's, (http://amix.dk/vim/vimrc.html). I also stole
+some ideas from the answers to this stackoverflow question:
+http://stackoverflow.com/questions/164847/what-is-in-your-vimrc
+
+
+.tmux.conf
+
+I based my .tmux.conf on Tony Narloc's
+(https://github.com/tony/tmux-config). I also got
+some tips on tmux and mouse interactions from Dan Lowe
+(http://tangledhelix.com/blog/2012/07/16/tmux-and-mouse-mode/).
+
+
+.ssh/rc
+
+The tmux/ssh agent fix came from
+http://superuser.com/questions/180148/how-do-you-get-screen-to-automatically-connect-to-the-current-ssh-agent-when-re
+
