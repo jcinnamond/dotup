@@ -6,6 +6,10 @@ DOTUP_HOME=$HOME/.dotup
 DOTFILE_DIR=$DOTUP_HOME/dotfiles
 RESTORE_DIR=$DOTUP_HOME/restore
 
+# The suppress file lives outside the dotup directory
+# as it is not designed to be a local override.
+SUPPRESS_FILE=$HOME/.suppress-dotup
+
 progname=`basename $0`
 command=$1
 command_arg=$2
@@ -69,6 +73,20 @@ function link_files {
     dir=`dirname $path | sed -e "s|$DOTFILE_DIR||"`
     file=`basename $path`
     symlink_dest=$HOME$dir/$file
+
+    if [ -r "$SUPPRESS_FILE" ]; then
+      search_dir=`echo $dir | sed -e 's|^/||'`
+      if [ -z "$search_dir" ]; then
+        search=$file
+      else
+        search=$search_dir/$file
+      fi
+      grep "^$search\$" $SUPPRESS_FILE > /dev/null 2>&1
+      if [ $? -eq 0 ]; then
+        debug "skipping suppressed file: $symlink_dest\n"
+        continue
+      fi
+    fi
 
     # Backup existing files
     if [ -h $symlink_dest ]; then

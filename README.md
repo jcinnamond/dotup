@@ -64,6 +64,32 @@ yet. Second, it shows any new commits that have been pushed to github
 that you haven't applied yet, or any commits that you have made locally
 that haven't been pushed to github yet.
 
+Machine specific overrides
+==========================
+
+There are 2 approaches to overriding the behaviour of config files on a
+per-machine basis. The first (and best way) is to use conditional logic
+in the config file where this is available. For example, in my .zshrc
+I can add:
+
+    local_config="$HOME/.zshrc.local"
+    if [ -r local_config ]; then
+      source local_config
+    fi
+
+However, if the config file doesn't support conditional includes or if
+you simply don't want a file to be installed at all then you can tell
+dotup to ignore that file. To this this, create a file in your home
+directory called `.suppress-dotup`. In there, put the path to the each
+file you want suppressed on a line on its own. For example, if I want
+to suppress .ssh/rc and .zshrc then I would create `.suppress-dotup`
+with the following content:
+
+    .ssh/rc
+    .zshrc
+
+*There is currently no support for wildcards or suppressing whole directories.*
+
 Uninstalling
 ============
 
