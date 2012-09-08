@@ -39,6 +39,7 @@ COMMANDS:
   cleanup  - removes dangling symlinks to .dotup
 
   remove   - removes all symlinks to .dotup, restoring any original files
+             $DOTUP_HOME is removed if it is safe to do so
 EOF
 }
 
@@ -98,11 +99,11 @@ function link_files {
 function run_scripts {
   dir=$1
 
+  scripts=`find $dir -type f -executable`
   scripts=`ls $dir`
   for script in $scripts; do
-    path=$dir/$script
-    debug "running script: $path"
-    source $path
+    debug "running script: $script"
+    source $script
   done
 }
 
