@@ -1,5 +1,7 @@
 #!/bin/bash
 
+REPO='git@github.com:jcinnamond/dotup.git'
+
 DOTUP_HOME=$HOME/.dotup
 DOTFILE_DIR=$DOTUP_HOME/dotfiles
 RESTORE_DIR=$DOTUP_HOME/restore
@@ -108,7 +110,7 @@ function run_scripts {
 }
 
 function install {
-  git clone git@github.com:jcinnamond/dotup.git $HOME/.dotup > /dev/null 2>&1
+  git clone $REPO $DOTUP_HOME > /dev/null 2>&1
   mkdir -p $HOME/bin
   ln -sf $DOTUP_HOME/bin/dotup $HOME/bin/dotup
   run_scripts "$DOTUP_HOME/pre_install"
