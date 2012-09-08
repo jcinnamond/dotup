@@ -14,7 +14,7 @@ be non-destructive, but there is no guarantee that this script won't break
 things. It runs some scripts to update a number of important files under
 your home directory, so there is the potential for something going wrong.*
 
-The best way to get started is to clone this repo, change `REPO` at the
+The best way to get started is to fork this repo, change `REPO` at the
 top of `bin/dotup`, replace the contents of `dotfiles` with your own
 setup and then run the dotup file. The project is designed to be self-
 installing, so you can do something like this:
