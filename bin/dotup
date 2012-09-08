@@ -37,6 +37,12 @@ COMMANDS:
   up       - setup or update the profile 
              (default if no command given)
 
+  add      - move a file to $DOTFILE_DIR and create a symlink to it
+
+  commit   - wrapper around 'cd $DOTFILE_DIR; git commit -a'
+
+  push     - wrapper around 'cd $DOTFILE_DIR; git push'
+
   status   - warn about any updates or local modifications
              Add 'local' to only show modified files
              Add 'remote' to only show changes with origin
@@ -154,6 +160,56 @@ function up {
     install
     printf "dotup finished\n"
   fi
+  popd > /dev/null
+}
+
+function add {
+  while (($#)); do
+    path=$1
+    shift
+
+    if [ X$path == Xdebug ]; then
+      continue
+    fi
+
+    echo $path | grep '^./' > /dev/null 2>&1
+    starts_with_dot_slash=$?
+
+    echo $path | grep '^/' > /dev/null 2>&1
+    starts_with_slash=$?
+
+    if [ $starts_with_dot_slash -eq 0 ]; then
+      path=$CWD/`echo $path | sed -e "s|./||"`
+    elif [ $starts_with_slash -ne 0 ]; then
+      path=$CWD/$path
+    fi
+
+    debug "adding $path\n"
+
+    dir=`dirname $path | sed -e "s|$HOME||"`
+    file=`basename $path`
+    symlink_dest=$HOME$dir/$file
+
+    mkdir -p $RESTORE_DIR$dir
+    cp $path $RESTORE_DIR$dir
+
+    mkdir -p $DOTFILE_DIR$dir
+    mv $path $DOTFILE_DIR$dir
+
+    ln -sf $DOTFILE_DIR$dir/$file $symlink_dest
+  done
+}
+
+function push {
+  pushd $DOTUP_HOME > /dev/null
+  git push
+  popd > /dev/null
+}
+
+function commit {
+  pushd $DOTUP_HOME > /dev/null
+  git add .
+  git commit
   popd > /dev/null
 }
 
@@ -276,6 +332,13 @@ elif [ $command == "cleanup" ]; then
   cleanup
 elif [ $command == "remove" ]; then
   remove
+elif [ $command == "add" ]; then
+  shift
+  add $@
+elif [ $command == "commit" ]; then
+  commit
+elif [ $command == "push" ]; then
+  push
 elif [ $command == "-h" -o $command == "help" ]; then
   usage
 else

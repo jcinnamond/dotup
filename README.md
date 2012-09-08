@@ -48,6 +48,23 @@ and be careful to back files up before using this tool.
 Updating dotfiles
 =================
 
+Using dotup helpers
+-------------------
+
+Add a file to `$HOME/.dotup/dotfiles` by running:
+
+    dotup add <path to file>
+
+This will add it to the dotfile directory, copy the file to
+.dotfile/restore and then create a symlink for the file.
+
+There are also two helpers to speed up commiting and pushing
+changes. These are (somewhat unimaginatively) `dotup commit` and
+`dotup push`.
+
+Manually
+--------
+
 On any machine with dotup installed you should be able to modify, add
 or remove files under `$HOME/.dotup/dotfiles` and then use git add/rm
 and commit as normal. Once you have pushed those changes you simply
