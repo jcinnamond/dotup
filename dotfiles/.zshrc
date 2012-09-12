@@ -61,4 +61,4 @@ addpath ./bin s
 
 export EDITOR=vim
 
-export SSH_AGENT_PATH=$HOME/.ssh/ssh_auth_sock
+export SSH_AUTH_SOCK=$HOME/.ssh/ssh_auth_sock
