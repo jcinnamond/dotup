@@ -125,7 +125,7 @@ function link_files {
 function run_scripts {
   dir=$1
 
-  scripts=`find $dir -type f -executable`
+  scripts=`find $dir -type f -perm -0100`
   for script in $scripts; do
     debug "running script: $script"
     source $script
@@ -259,8 +259,8 @@ function cleanup {
   force=$1
   symlinks=`find $HOME -type l 2> /dev/null`
   for link in $symlinks; do
-    src=`stat --format=%N $link | sed -e "s/^\\\`\([^']*\)'.*/\1/"`
-    dest=`stat --format=%N $link | sed -e "s/.*\\\`\(.*\)'$/\1/"`
+    src=`ls -l $link | sed -e 's/.* \(.*\) -> .*/\1/'`
+    dest=`ls -l $link | sed -e 's/.* -> \(.*\)/\1/'`
     echo $dest | grep $DOTUP_HOME > /dev/null 2>&1
     if [ $? -eq 0 ]; then
       if [ X$force == Xforce -o ! -r $dest ]; then
